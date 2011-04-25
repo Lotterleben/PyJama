@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 
+
+import ConfigParser
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -12,6 +14,11 @@ class PyJama:
      # todo? callbacks, sicherstellen dass nur zahlen "," und ":" eingegeben werden, 
 
      def __init__(self):
+          # TODO: read config file
+          # NOTE: An application which requires initial values to be loaded from 
+          # a file should load the required file or files using readfp() 
+          # before calling read() for any optional files:'
+            
           #create window
           self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
           
@@ -39,6 +46,7 @@ class PyJama:
           #creating the button (duh)
           self.button = gtk.Button("create crontab")
           self.button.connect("clicked", self.ctabpop)
+         
 
           #killswitch
           self.window.connect("destroy", self.destroy)
@@ -63,10 +71,29 @@ class PyJama:
 
 
      #popup window with finished crontab
-     def ctabpop(self, widget):
+     def ctabpop(self, widget): 
+        
+      #TODO: write times to config file so they will never be forgotten.
+          config=ConfigParser.ConfigParser()
+          #section which contains weekdays. these can be addressed with their index nr.
+          # example: 
+          # 1: '13:37, 17, 20:00'
+          config.addSection('days')
+          for in in range(7,0):
+               config.set(str(i),self.days[i].get_text())
+          
+          # hier noch wecklied etc speichern.
+          
+          # TODO: create folder so the st,uff will be stored in
+          # ~/.config/PyJamas
+          with open('~/.config/PyJamas.cfg', 'w') as configfile:
+              config.write(configfile)
+          
+      #nao: parsing & creating the crontab.
+          
           buff = gtk.TextBuffer(table=None)
           times = self.parse_times()
-     # aus irgendeinem Grund erzeugt das 6 statt 7 zeilen.. wtf
+          
           for i in range (0,7):
                weekday=times[i]
                for j in weekday:
@@ -103,6 +130,7 @@ class PyJama:
                     correct_times.append(tmp)
                new_days.append(correct_times)
                print("ct" +str(correct_times) +"ct")
+          
           return new_days
 
      #whatever this actually does (or doesn't, according to the interpreter)...
