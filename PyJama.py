@@ -44,29 +44,21 @@ class PyJama:
         self.button = gtk.Button("create crontab")
         self.button.connect("clicked", self.ctabpop)
         
-
         #killswitch
         self.window.connect("destroy", self.destroy)
-        #self.window.connect("delete_event". self.delete_event)
-        
-        #loading configs
-        # TODO
-        # NOTE: An application which requires initial values to be loaded from 
-        # a file should load the required file or files using readfp() 
-        # before calling read() for any optional files:'
+        #self.window.connect("delete_event". self.delete_event)'
         
         self.config=ConfigParser.ConfigParser()
-        #TODO: checken ob datei existiert 
+        # only read from the file if it exists :D
         if os.path.exists('PyJama.cfg'):
             pyjamafile= open('PyJama.cfg')
             self.config.readfp(pyjamafile)
             self.config.read('PyJama.cfg')
-            #copy stored configs to time windows                                                            
+            #copy stored configs to time textfields                                                           
             for i in range (0,7):
                 self.days[i].set_text(self.config.get('days',str(i)))
             pyjamafile.close()
         
-
         # add & show geraffel
         for i in range(0,7):
             self.daybox.add(self.days[i])
@@ -92,7 +84,6 @@ class PyJama:
         #section which contains weekdays. these can be addressed with their index nr.
         # example: 
         # 1: '13:37, 17, 20:00'
-        # TODO: check for already existing scetions 
         if not self.config.has_section('days'):
             self.config.add_section('days')
         for i in range(0,7):
@@ -109,8 +100,7 @@ class PyJama:
            self.config.write(configfile)
       #TODO: close the file, baby.
 
-     #nao: parsing & creating the crontab.
-        
+      #and nao: parsing & creating the crontab.
         buff = gtk.TextBuffer(table=None)
         times = self.parse_times()
         
@@ -141,7 +131,6 @@ class PyJama:
             #nun habe ich zB ["12:35","13:5"] und muss noch min & h verdrehen
             for j in lst:
                 tmp= j.split(":")
-                #klappt noch nicht so recht
                 for k in range(0,len(tmp)):
                     tmp[k] = tmp[k].strip()
                 if len(tmp)==1: tmp.append("00")
