@@ -12,7 +12,8 @@ class PyJama:
     # this little script provides a klickibunti Environment that lets you create
     # crontabs für viirus' DIY alarm clock: http://f.pherth.net/vip/
 
-    # todo? callbacks, sicherstellen dass nur zahlen "," und ":" eingegeben werden, 
+    # todo? callbacks, sicherstellen dass nur zahlen "," und ":" eingegeben werden,
+     
 
     def __init__(self):
 
@@ -49,15 +50,21 @@ class PyJama:
         #self.window.connect("delete_event". self.delete_event)'
         
         self.config=ConfigParser.ConfigParser()
-        # only read from the file if it exists :D
-        if os.path.exists('PyJama.cfg'):
-            pyjamafile= open('PyJama.cfg')
-            self.config.readfp(pyjamafile)
-            self.config.read('PyJama.cfg')
-            #copy stored configs to time textfields                                                           
-            for i in range (0,7):
-                self.days[i].set_text(self.config.get('days',str(i)))
-            pyjamafile.close()
+        self.pyjamapath = os.path.expanduser('~')+'/.config/PyJama/'
+        # control structure- double tap.
+        if os.path.exists(self.pyjamapath):
+            # only read from the file if it exists :D
+            if os.path.exists(self.pyjamapath +'PyJama.cfg'):
+                pyjamafile= open(self.pyjamapath +'PyJama.cfg')
+                self.config.readfp(pyjamafile)
+                self.config.read(pyjamafile)
+                #copy stored configs to textfields                                                         
+                for i in range (0,7):
+                    self.days[i].set_text(self.config.get('days',str(i)))
+                pyjamafile.close()
+        else: 
+            os.makedirs(self.pyjamapath)
+            
         
         # add & show geraffel
         for i in range(0,7):
@@ -77,10 +84,12 @@ class PyJama:
         self.window.show_all()
 
 
-    #popup window with finished crontab
+    # popup window with finished crontab. Whan this is generated, the User's settings
+    # will be stored to /home/<user>/.config/PyJama/Pyjama.cfg .
     def ctabpop(self, widget): 
        
-     #TODO: write times to config file so they will never be forgotten.
+        # write times to config file so they will never be forgotten.
+        #TODO: unhighlight lines when displayed in freshly started program
         #section which contains weekdays. these can be addressed with their index nr.
         # example: 
         # 1: '13:37, 17, 20:00'
@@ -91,14 +100,11 @@ class PyJama:
             
         # hier noch wecklied etc speichern.
         
-      # TODO: 
-	  # specify paths...
-	  # create folder so the stuff will be stored in
-        # ~/.config/PyJamas
-
-        with open('PyJama.cfg', 'w') as configfile:
+        # doppelt gemoppelt. muesste man mal richtig machen.
+        pyjamafile = open(self.pyjamapath+'PyJama.cfg', 'w')
+        with pyjamafile as configfile:
            self.config.write(configfile)
-      #TODO: close the file, baby.
+        pyjamafile.close()
 
       #and nao: parsing & creating the crontab.
         buff = gtk.TextBuffer(table=None)
@@ -126,7 +132,6 @@ class PyJama:
             #lese jeden wochentagsstring aus und mach ihn passend
             strs = self.days[i].get_text()
             lst = strs.split(",")
-            #print(lst)
             correct_times = []
             #nun habe ich zB ["12:35","13:5"] und muss noch min & h verdrehen
             for j in lst:
