@@ -2,7 +2,7 @@
 # -*- coding: utf-8 
 
 import ConfigParser
-import os.path
+import os
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -11,9 +11,10 @@ class PyJama:
     # warning: I never said it was going to be pretty.
     # this little script provides a klickibunti Environment that lets you create
     # crontabs für viirus' DIY alarm clock: http://f.pherth.net/vip/
-
-    # todo? callbacks, sicherstellen dass nur zahlen "," und ":" eingegeben werden,
-     
+    
+    # this will only work if you've got your VIP's sshd up&running and 
+    # didn't set a root password. 
+    # (yess, will fix the latter.)
 
     def __init__(self):
 
@@ -97,9 +98,12 @@ class PyJama:
         self.window.show_all()
 
 
-    # popup window with finished crontab. Whan this is generated, the User's settings
+    # popup window with finished crontab. When this is generated, the User's settings
     # will be stored to /home/<user>/.config/PyJama/Pyjama.cfg .
     def ctabpop(self, widget): 
+        # MAJOR TODO: scp-operationen und eigentliche crontabesrellung hier
+        # raustrieseln und in eigene methoden packen. dann evtl 2 buttons anlegen:
+        # "show crontab" und "copy crontab to Box" oder so
        
         # write times to config file so they will never be forgotten.
         #TODO: unhighlight lines when displayed in freshly started program
@@ -124,16 +128,29 @@ class PyJama:
            self.config.write(configfile)
         pyjamafile.close()
 
-      #and nao: parsing & creating the crontab.
+        #and nao: parsing & creating the crontab.
         buff = gtk.TextBuffer(table=None)
         times = self.parse_times()
         
+        # creating local the crontab so it can be scp'd. this is only temporary and
+        # yes, this is idiotic (see below.). But I really need something to work right now.
+        # TODO: fix this mess.
+
+        pyjamatab= open(self.pyjamapath+'crontab', 'w')
+
+
+        # print crontab to popup & store it in pyjamatab:        
         for i in range (0,7):
             weekday=times[i]
             for j in weekday:
-                buff.insert(buff.get_end_iter(), "& "+j+" * * "+ str(i+1) +" sh /flash2/alarm-clock \n")
+                line = "& "+j+" * * "+ str(i+1) +" sh /flash2/alarm-clock \n"
+                buff.insert(buff.get_end_iter(), line)
+                pyjamatab.write(line)
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         # a fixed size may not be the best of ideas, but for now, this will do.
+
+        pyjamatab.close()
+
         window.resize(1000,500)
 
         ct_text=gtk.TextView(buff)
@@ -143,7 +160,11 @@ class PyJama:
         print "tadaa"
         
         # scp crontab to box:
-    
+        # es ist iwie unsinnig, fuer den vorgang die crontab nochmal zwischenzuspeichern.
+        # TODO: mal gucken ob ich den buff auch ruebergeschleust bekomm...
+        os.system('scp "%s" "%s:%s"' % (self.pyjamapath+'crontab', 'root@'+self.e_ip.get_text(),'/flash2/crontab') )
+
+
     # mach die eintraege crontabkompatibel und gib sie als liste im Format
     # [["mm hh"]] aus.
     def parse_times(self):
@@ -181,5 +202,5 @@ if __name__ == "__main__":
     pj = PyJama()
     pj.main()
 
-
+# todo? callbacks, sicherstellen dass nur zahlen "," und ":" eingegeben werden,
     
