@@ -21,15 +21,15 @@ class PyJama:
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         
         # create actual containers
-	self.ipbox= gtk.HBox()
+        self.ipbox= gtk.HBox()
         self.daybox= gtk.VBox()
         labelbox = gtk.VBox()
-	self.timebox = gtk.HBox()
+        self.timebox = gtk.HBox()
         self.allbox = gtk.VBox()
 
-	# create IP entry field
-	l_ip = gtk.Label("your VIP's IP:")
-	self.e_ip = gtk.Entry()	
+        # create IP entry field
+        l_ip = gtk.Label("your VIP's IP:")
+        self.e_ip = gtk.Entry()	
 
         #create text fields
         self.days = []
@@ -55,10 +55,10 @@ class PyJama:
         self.window.connect("destroy", self.destroy)
         #self.window.connect("delete_event". self.delete_event)'
         
-	#loading the configs
+        #loading the configs
         self.config=ConfigParser.ConfigParser()
         self.pyjamapath = os.path.expanduser('~')+'/.config/PyJama/'
-	print self.pyjamapath
+        print self.pyjamapath
         # control structure- double tap.
         if os.path.exists(self.pyjamapath):
             # only read from the file if it exists :D
@@ -69,15 +69,15 @@ class PyJama:
                 #copy stored configs to textfields                                                         
                 for i in range (0,7):
                     self.days[i].set_text(self.config.get('days',str(i)))
-		self.e_ip.set_text(self.config.get('IP','ip'))
+                self.e_ip.set_text(self.config.get('IP','ip'))
                 pyjamafile.close()
         else: 
             os.makedirs(self.pyjamapath)
             
         
         # add & show geraffel
-	self.ipbox.add(l_ip)
-	self.ipbox.add(self.e_ip)
+        self.ipbox.add(l_ip)
+        self.ipbox.add(self.e_ip)
         for i in range(0,7):
             self.daybox.add(self.days[i])
         self.daybox.add(self.button)
@@ -91,8 +91,8 @@ class PyJama:
         labelbox.add(l_space)
         self.timebox.add(labelbox)
         self.timebox.add(self.daybox)
-	self.allbox.add(self.ipbox)
-	self.allbox.add(self.timebox)
+        self.allbox.add(self.ipbox)
+        self.allbox.add(self.timebox)
         self.window.add(self.allbox)
         self.window.show_all()
 
@@ -111,10 +111,10 @@ class PyJama:
         for i in range(0,7):
             self.config.set('days',str(i),self.days[i].get_text())
 
-	# store ip in config
-	if not self.config.has_section('IP'):
-		self.config.add_section('IP')
-	self.config.set('IP','ip',self.e_ip.get_text())
+        # store ip in config
+        if not self.config.has_section('IP'):
+            self.config.add_section('IP')
+        self.config.set('IP','ip',self.e_ip.get_text())
             
         # hier noch wecklied etc speichern.
         
@@ -141,8 +141,8 @@ class PyJama:
         window.add(ct_text)
         window.show_all()
         print "tadaa"
-	
-	# scp crontab to box:
+        
+        # scp crontab to box:
     
     # mach die eintraege crontabkompatibel und gib sie als liste im Format
     # [["mm hh"]] aus.
