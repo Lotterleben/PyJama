@@ -6,6 +6,7 @@ import os
 import pygtk
 pygtk.require('2.0')
 import gtk
+import string
 
 class PyJama:
     # warning: I never said it was going to be pretty.
@@ -51,7 +52,7 @@ class PyJama:
 
         #creating the buttons (duh)
         button_show = gtk.Button("show crontab")
-        button_scp = gtk.Button("copy settings to Box")
+        button_scp = gtk.Button("Set Alarm")
         # !! idee: "launcher" methode, die das vospiel fuer beide macht und je nach uebergebenem parameter 
         # dann koper- oder anzeigemethode aufruft. -> TODO: connections neu
         # & klaeren: muss das self. sein?
@@ -185,7 +186,18 @@ class PyJama:
         """ copies the generated ctab (stored @ pyjamapath)
         to the VIP behind the specified IP"""
         
-        os.system('scp "%s" "%s:%s"' % (self.pyjamapath+'crontab', 'root@'+self.e_ip.get_text(),'/flash2/crontab') )
+        sys =os.system('scp "%s" "%s:%s"' % (self.pyjamapath+'crontab', 'root@'+self.e_ip.get_text(),'/flash2/crontab') )
+        
+        #check if the scp was successful and display an error message if not
+        # TODO: watch stdin/stderr for password requests etc (for example if somebody set a root pswd)
+        err_msg=gtk.TextBuffer(table=None)
+        if sys is not 0:
+            #some error occured
+            err_msg.set_text("\n o noes! It looks like setting the alarm has failed.\n Please check your settings and try again.")
+            self.event_popup(err_msg)
+        else:
+            err_msg.set_text("\n wheee! Setting the alarm was successful. Sleep tight!")
+            self.event_popup(err_msg)
         
     def ctabpop(self, buff):
         """popup window that shows the crontab""" 
@@ -193,18 +205,17 @@ class PyJama:
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         # a fixed size may not be the best of ideas, but for now, this will do
         window.resize(1000,500)
-
+        window.set_position(gtk.WIN_POS_CENTER)
         ct_text=gtk.TextView(buff)
         ct_text.set_editable(False)
         window.add(ct_text)
         window.show_all()
-        print "tadaa"
-
 
     # mach die eintraege crontabkompatibel und gib sie als liste im Format
     # [["mm hh"]] aus.
     def parse_times(self):
         new_days= []
+        nondigit=False
         for i in range(0,7):
             #lese jeden wochentagsstring aus und mach ihn passend
             strs = self.days[i].get_text()
@@ -214,15 +225,33 @@ class PyJama:
             for j in lst:
                 tmp= j.split(":")
                 for k in range(0,len(tmp)):
+                    #check for non-digit chars
                     tmp[k] = tmp[k].strip()
+                    #check for non-digit chars
+                    if not tmp[k].isdigit():
+                        tmp[k]=""
+                        nondigit=True
                 if len(tmp)==1: tmp.append("00")
                 tmp.reverse()
                 tmp = " ".join(tmp)
                 correct_times.append(tmp)
             new_days.append(correct_times)
-            print("ct" +str(correct_times) +"ct")
-        
+                    #if there have been non-digit chars, note the user
+        err = gtk.TextBuffer(table=None)
+        err.set_text("\n It looks like you had some non-digit characters in your alarm times. \n You may want to double-check them. \n We still updated all the correct times, though :)")
+        self.event_popup(err)
         return new_days
+
+    def event_popup(self, msg):
+        window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        window.resize(300,100)
+        window.set_position(gtk.WIN_POS_CENTER)
+        err_txt=gtk.TextView(msg)
+        err_txt.set_editable(False)
+        window.add(err_txt)
+        window.show_all()
+        
+
 
     def delete_event(self, widget, event, data=None):
         print "somebody tried to quit this."
