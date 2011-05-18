@@ -116,9 +116,18 @@ class PyJama:
     def launcher(self, widget, button_action):
         # will keep the button_action thingamabob in case there are other buttons in the future
         self.store_settings()
+        
+        #prepare for the arrival of event messages
+        ev_msg=gtk.TextBuffer(table=None)
+        ev_msg.set_text("we've got news for you: \n ===================================================== \n")
         if button_action is "copy":
-            self.copy_ctab(widget)
+            # copy crontab and collect generated event messages
+            ev_msg.insert_at_cursor(self.copy_ctab(widget))
+        # pop up collected error messages:
+        self.event_popup(ev_msg)
+        
 
+        
 
     def store_settings(self):
         """ stores the user's settings to /home/<user>/.config/PyJama/Pyjama.cfg """
@@ -192,18 +201,15 @@ class PyJama:
         
         #check if the scp was successful and display an error message if not
         # TODO: watch stdin/stderr for password requests etc (for example if somebody set a root pswd)
-        err_msg=gtk.TextBuffer(table=None)
-        err_msg.set_text("we've got news for you: \n ===================================================== \n")
+        err_msg=""
         if nondigit_err:
-            print "nondigiterr"
-            err_msg.insert_at_cursor("\n -* It looks like you had some non-digit characters in your alarm times. \n You may want to double-check them. \n We still updated all the correct times, though :) \n")
+            err_msg+="\n -* It looks like you had some non-digit characters in your alarm times. You may want to double-check them. \n We still updated all the correct times, though :) \n"
         if sys is not 0:
             #some error occured
-            err_msg.insert_at_cursor("\n -* o noes! It looks like setting the alarm has failed, probably because your Box didn't respond. \n Please check your settings and try again.")
-            self.event_popup(err_msg)
+            err_msg+="\n -* o noes! It looks like setting the alarm has failed, probably because your Box didn't respond. \n Please check your settings and try again."
         else:
-            err_msg.insert_at_cursor("\n -* wheee! Setting the alarm was successful. Sleep tight!")
-            self.event_popup(err_msg)
+            err_msg+="\n -* wheee! Setting the alarm was successful. Sleep tight!\n"
+        return err_msg
         
     def ctabpop(self, buff):
         """popup window that shows the crontab""" 
