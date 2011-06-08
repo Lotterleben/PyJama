@@ -13,11 +13,18 @@ class PyJama:
     # warning: I never said it was going to be pretty.
     # this little script provides a klickibunti Environment that lets you create
     # crontabs für viirus' DIY alarm clock: http://f.pherth.net/vip/
-    
-    # this will only work if you've got your VIP's sshd up&running and 
+
+    #-- this will only work if you've got your VIP's sshd up&running and 
     # didn't set a root password. 
     # (yess, will fix the latter.)
-    # you also need to install the python-eyed3 module to make this work
+    # -- you also need to install the python-eyed3 module to make this work.
+    # -- For some reason the Author of some of the IP scripts decided id was a
+    # good idea to mount usb-stick read-only. this means ou won't be able to copy
+    # any files to your VIP using pyjama or telnet. To disable this 'feature'
+    # simply change the "mount -o ro /dev/scsi/host0/bus0/target0/lun0/part1 /mnt"
+    # line in your /flash2/myrc file to "mount /dev/scsi/host0/bus0/target0/lun0/part1 /mnt"
+    # -- oh, and please make sure you have a /media directory on your usb-stick
+    # (this is where your music goes, if you ant to add some manually). 
 
     def __init__(self):
         self.init_stuff()
@@ -300,7 +307,7 @@ class PyJama:
         if err_check:
             print "musiccopyfail"
             return "\n -*we had difficulties copying the following files:"+err_file
-        #return ""
+        return "all your music was transferred successfully. yay!"
     
     def ctabpop(self, buff):
         """popup window that shows the crontab. deprecated, but who knows, I might ned it someday.""" 
@@ -394,6 +401,7 @@ if __name__ == "__main__":
 
 # todos:
 # (callbacks sauber)
+# fortschrittsbalken beim upload
 # displaying tracks that are already on the VIP
 # playlist uploading/editing
 # make the GUI less of an eyesore
